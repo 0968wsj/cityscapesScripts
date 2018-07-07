@@ -580,6 +580,41 @@ def evaluateImgLists(predictionImgList, groundTruthImgList, args):
     return allResultsDict
 
 
+def evaluateImgPair(predictionImg, groundTruthImg, confMatrix, args):
+    # Loading all resources for evaluation.
+    predictionNp = np.array(predictionImg)
+
+    groundTruthNp = np.array(groundTruthImg)
+
+    # load ground truth instances, if needed
+
+    # Check for equal image sizes
+    if groundTruthImg.shape[0] != predictionImg.shape[0]:
+        printError("Image widths are not equal.")
+    if groundTruthImg.shape[1] != predictionImg.shape[1]:
+        printError("Image heights are not equal.")
+    if 2 != len(predictionNp.shape):
+        printError("Predicted image has multiple channels.")
+
+    imgWidth = predictionImg.shape[0]
+    imgHeight = predictionImg.shape[1]
+    nbPixels = imgWidth * imgHeight
+
+    # Evaluate images
+    if CSUPPORT:
+        # using cython
+        confMatrix = addToConfusionMatrix.cEvaluatePair(predictionNp.astype(np.uint8), groundTruthNp.astype(np.uint8), confMatrix, args.evalLabels)
+    else:
+        # the slower python way
+        for (groundTruthImgPixel, predictionImgPixel) in izip(groundTruthImg.getdata(), predictionImg.getdata()):
+            if not groundTruthImgPixel in args.evalLabels:
+                printError("Unknown label with id {:}".format(groundTruthImgPixel))
+
+            confMatrix[groundTruthImgPixel][predictionImgPixel] += 1
+
+    return nbPixels
+
+
 # Main evaluation method. Evaluates pairs of prediction and ground truth
 # images which are passed as arguments.
 def evaluatePair(predictionImgFileName, groundTruthImgFileName, confMatrix, instanceStats, perImageStats, args):
