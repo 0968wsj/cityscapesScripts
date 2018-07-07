@@ -24,8 +24,6 @@
 # evaluation.
 
 # python imports
-from __future__ import print_function
-
 import fnmatch
 import os
 import platform
@@ -180,7 +178,7 @@ args.predictionWalk = None
 def generateMatrix(args):
     args.evalLabels = []
     for label in labels:
-        if (label.id < 0):
+        if label.id < 0:
             continue
         # we append all found labels, regardless of being ignored
         args.evalLabels.append(label.id)
@@ -190,9 +188,7 @@ def generateMatrix(args):
 
 
 def generateInstanceStats(args):
-    instanceStats = {}
-    instanceStats["classes"] = {}
-    instanceStats["categories"] = {}
+    instanceStats = {"classes": {}, "categories": {}}
     for label in labels:
         if label.hasInstances and not label.ignoreInEval:
             instanceStats["classes"][label.name] = {}
@@ -227,7 +223,7 @@ def generateInstanceStats(args):
 def getMatrixFieldValue(confMatrix, i, j, args):
     if args.normalized:
         rowSum = confMatrix[i].sum()
-        if (rowSum == 0):
+        if rowSum == 0:
             return float('nan')
         return float(confMatrix[i][j]) / rowSum
     else:
@@ -370,10 +366,12 @@ def getInstanceIouScoreForCategory(category, confMatrix, instStats, args):
 # create a dictionary containing all relevant results
 def createResultDict(confMatrix, classScores, classInstScores, categoryScores, categoryInstScores, perImageStats, args):
     # write JSON result file
-    wholeData = {}
-    wholeData["confMatrix"] = confMatrix.tolist()
-    wholeData["priors"] = {}
-    wholeData["labels"] = {}
+    wholeData = {
+        "confMatrix": confMatrix.tolist(),
+        "priors": {},
+        "labels": {}
+    }
+
     for label in args.evalLabels:
         wholeData["priors"][id2label[label].name] = getPrior(label, confMatrix)
         wholeData["labels"][id2label[label].name] = label
@@ -420,7 +418,7 @@ def printConfMatrix(confMatrix, args):
 
     # print matrix
     for x in range(0, confMatrix.shape[0]):
-        if (not x in args.evalLabels):
+        if not x in args.evalLabels:
             continue
         # get prior of this label
         prior = getPrior(x, confMatrix)
@@ -435,7 +433,7 @@ def printConfMatrix(confMatrix, args):
         print("\b{text:>{width}} |".format(width=13, text=name), end=' ')
         # print matrix content
         for y in range(0, len(confMatrix[x])):
-            if (not y in args.evalLabels):
+            if not y in args.evalLabels:
                 continue
             matrixFieldValue = getMatrixFieldValue(confMatrix, x, y, args)
             print(getColorEntry(matrixFieldValue, args) + "\b{text:>{width}.2f}  ".format(width=args.printRow,
@@ -452,7 +450,7 @@ def printConfMatrix(confMatrix, args):
 
 # Print intersection-over-union scores for all classes.
 def printClassScores(scoreList, instScoreList, args):
-    if (args.quiet):
+    if args.quiet:
         return
     print(args.bold + "classes          IoU      nIoU" + args.nocol)
     print("--------------------------------")
@@ -468,7 +466,7 @@ def printClassScores(scoreList, instScoreList, args):
 
 # Print intersection-over-union scores for all categorys.
 def printCategoryScores(scoreDict, instScoreDict, args):
-    if (args.quiet):
+    if args.quiet:
         return
     print(args.bold + "categories       IoU      nIoU" + args.nocol)
     print("--------------------------------")
@@ -561,7 +559,7 @@ def evaluateImgLists(predictionImgList, groundTruthImgList, args):
         categoryInstScoreList[category] = getInstanceIouScoreForCategory(category, confMatrix, instStats, args)
 
     # Print IOU scores
-    if (not args.quiet):
+    if not args.quiet:
         print("")
         printCategoryScores(categoryScoreList, categoryInstScoreList, args)
         iouAvgStr = getColorEntry(getScoreAverage(categoryScoreList, args), args) + "{avg:5.3f}".format(
@@ -589,13 +587,15 @@ def evaluatePair(predictionImgFileName, groundTruthImgFileName, confMatrix, inst
     try:
         predictionImg = Image.open(predictionImgFileName)
         predictionNp = np.array(predictionImg)
-    except:
+    except Exception as e:
         printError("Unable to load " + predictionImgFileName)
+        printError(e)
     try:
         groundTruthImg = Image.open(groundTruthImgFileName)
         groundTruthNp = np.array(groundTruthImg)
-    except:
+    except Exception as e:
         printError("Unable to load " + groundTruthImgFileName)
+        printError(e)
     # load ground truth instances, if needed
     if args.evalInstLevelScore:
         groundTruthInstanceImgFileName = groundTruthImgFileName.replace("labelIds", "instanceIds")
@@ -606,11 +606,11 @@ def evaluatePair(predictionImgFileName, groundTruthImgFileName, confMatrix, inst
             printError("Unable to load " + groundTruthInstanceImgFileName)
 
     # Check for equal image sizes
-    if (predictionImg.size[0] != groundTruthImg.size[0]):
+    if predictionImg.size[0] != groundTruthImg.size[0]:
         printError("Image widths of " + predictionImgFileName + " and " + groundTruthImgFileName + " are not equal.")
-    if (predictionImg.size[1] != groundTruthImg.size[1]):
+    if predictionImg.size[1] != groundTruthImg.size[1]:
         printError("Image heights of " + predictionImgFileName + " and " + groundTruthImgFileName + " are not equal.")
-    if (len(predictionNp.shape) != 2):
+    if len(predictionNp.shape) != 2:
         printError("Predicted image has multiple channels.")
 
     imgWidth = predictionImg.size[0]
@@ -618,7 +618,7 @@ def evaluatePair(predictionImgFileName, groundTruthImgFileName, confMatrix, inst
     nbPixels = imgWidth * imgHeight
 
     # Evaluate images
-    if (CSUPPORT):
+    if CSUPPORT:
         # using cython
         confMatrix = addToConfusionMatrix.cEvaluatePair(predictionNp, groundTruthNp, confMatrix, args.evalLabels)
     else:
@@ -692,11 +692,11 @@ def main():
     groundTruthImgList = []
 
     # the image lists can either be provided as arguments
-    if (len(argv) > 3):
+    if len(argv) > 3:
         for arg in argv:
-            if ("gt" in arg or "groundtruth" in arg):
+            if "gt" in arg or "groundtruth" in arg:
                 groundTruthImgList.append(arg)
-            elif ("pred" in arg):
+            elif "pred" in arg:
                 predictionImgList.append(arg)
     # however the no-argument way is prefered
     elif len(argv) == 0:

@@ -9,13 +9,14 @@
 try:
     from distutils.core import setup
     from Cython.Build import cythonize
-except:
+except Exception as e:
     print("Unable to setup. Please use pip to install: cython")
     print("sudo pip install cython")
+    print(e)
 import os
 import numpy
 
-os.environ["CC"]  = "g++"
+os.environ["CC"] = "g++"
 os.environ["CXX"] = "g++"
 
-setup(ext_modules = cythonize("addToConfusionMatrix.pyx"),include_dirs=[numpy.get_include()])
+setup(ext_modules=cythonize("addToConfusionMatrix.pyx"), include_dirs=[numpy.get_include()])
