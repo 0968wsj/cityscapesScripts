@@ -28,8 +28,8 @@ import os, glob, sys
 
 # cityscapes imports
 sys.path.append( os.path.normpath( os.path.join( os.path.dirname( __file__ ) , '..' , 'helpers' ) ) )
-from csHelpers        import printError
-from json2instanceImg import json2instanceImg
+from cityscapesscripts.helpers.csHelpers        import printError
+from cityscapesscripts.preparation.json2instanceImg import json2instanceImg
 
 
 # The main method

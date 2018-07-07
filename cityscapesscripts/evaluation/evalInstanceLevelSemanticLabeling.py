@@ -41,8 +41,8 @@ from copy import deepcopy
 
 # Cityscapes imports
 sys.path.append( os.path.normpath( os.path.join( os.path.dirname( __file__ ) , '..' , 'helpers' ) ) )
-from csHelpers      import *
-from instances2dict import instances2dict
+from cityscapesscripts.helpers.csHelpers      import *
+from cityscapesscripts.evaluation.instances2dict import instances2dict
 
 
 ###################################

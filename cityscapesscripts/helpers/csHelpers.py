@@ -29,15 +29,18 @@ except:
 # Numpy for datastructures
 try:
     import numpy as np
-except:
+except Exception as e:
+    print("Cry baby cry")
+    print(e)
     print("Failed to import numpy package.")
     sys.exit(-1)
 
 # Cityscapes modules
 try:
-    from annotation   import Annotation
-    from labels       import labels, name2label, id2label, trainId2label, category2labels
-except:
+    from cityscapesscripts.helpers.annotation import Annotation
+    from cityscapesscripts.helpers.labels       import labels, name2label, id2label, trainId2label, category2labels
+except Exception as e:
+    print("Exception:", e)
     print("Failed to find all Cityscapes modules")
     sys.exit(-1)
 

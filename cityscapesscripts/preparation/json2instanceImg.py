@@ -54,8 +54,8 @@ except:
 
 # cityscapes imports
 sys.path.append( os.path.normpath( os.path.join( os.path.dirname( __file__ ) , '..' , 'helpers' ) ) )
-from annotation import Annotation
-from labels     import labels, name2label
+from cityscapesscripts.helpers.annotation import Annotation
+from cityscapesscripts.helpers.labels     import labels, name2label
 
 # Print the information
 def printHelp():
