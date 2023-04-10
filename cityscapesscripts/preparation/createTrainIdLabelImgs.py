@@ -65,7 +65,7 @@ def main():
 
         # do the conversion
         try:
-            json2labelImg( f , dst , "trainIds" )
+            dst = f.replace( "_polygons.json" , "_trainIds.png" )
         except:
             print("Failed to convert: {}".format(f))
             raise
